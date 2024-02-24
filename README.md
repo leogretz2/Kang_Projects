@@ -4,13 +4,13 @@ for each one, package it into an object and send the result object back to the E
 
 ### Procedure
 #### Locations/Where to Start
-URL_Processor houses all the relevant scripts
-First part of script (redirects) handled in Redirect_Script_Send.ipynb therein. That work is now integrated into the scraping portion as well in Website_Information_Scraper.ipynb located there as well. \
+URL_Processor houses all the relevant scripts \
+First part of script (redirects) handled in Redirect_Script_Send.ipynb therein. That work is now integrated into the scraping portion in Website_Information_Scraper.ipynb located there as well. \
 Reports_Notes_Explorations.ipynb there is self-explanatory. \
-The Trials folder contains mostly failed attempts. \
+The Trials folder contains mostly failed attempts/explorations. \
 The Excel_Sheets_Public folder contains a csv file that has the start of one list of URLs to see the effect of script. \
 The csv files will contain 9 columns: \
-Company ID (18 Char) | Company Record Type | Company Name | Website | Website Redirect | Nav | Headers | Home Page | First Page \
+Company ID (18 Char) | Company Record Type | Company Name | Website | Website Redirect | Nav | Headers | Home Page | First Page (10 upon integration of 'Metadata' column before 'Nav')\
 
 The place to start is integrated_main2() in Website_Information_Scraper.ipynb, it all stems from there. Incorporates the API for metadata, the asynchronous redirect capturing and the now asynchronous scraping.
 
