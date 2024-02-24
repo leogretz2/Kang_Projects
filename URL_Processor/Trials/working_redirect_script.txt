@@ -1,0 +1,68 @@
+import aiohttp
+import asyncio
+import pandas as pd
+import nest_asyncio
+from urllib.parse import urlparse
+import validators
+
+nest_asyncio.apply()
+MAX_CONCURRENT_REQUESTS = 10
+
+async def check_url(session, url, semaphore):
+    async with semaphore:
+        try:
+            async with session.head(url, allow_redirects=True, timeout=4) as response:
+                return str(response.url)  # Return the final URL as a string
+        except asyncio.TimeoutError as te:
+            print(f"Timed out for url: {url}, {te}")
+            return None  # Return None for timeout
+        except aiohttp.ClientError as ce:
+            print(f"Client error for url: {url}, {ce}")
+            return None  # Return None for client error
+
+async def process_urls(urls):
+    semaphore = asyncio.Semaphore(MAX_CONCURRENT_REQUESTS)
+    async with aiohttp.ClientSession() as session:
+        tasks = [check_url(session, url, semaphore) for url in urls]
+        results = await asyncio.gather(*tasks)
+        return results
+
+def initial_processing(url):
+    if not url or url != url or pd.isna(url):
+        return ''
+    
+    # Sanitize url -> change name so not the same as in sanitize
+    corrected_url = sanitize_url(url)
+    return corrected_url
+
+def update_redirect_urls(file_path, urls, redirect_urls):
+    df = pd.read_csv(file_path, low_memory=False)
+    df['Website Redirect'] = redirect_urls
+    df.to_csv(file_path, index=False)
+
+file_path = 'Website_Redirects_230919.csv'
+df = pd.read_csv(file_path, low_memory=False)
+
+if 'Website' not in df.columns:
+    print("The CSV file must have a 'Website' column containing the URLs.")
+else:
+    raw_urls = df['Website'].tolist()
+    redirect_urls = df.get('Website Redirect', pd.Series(dtype=str)).tolist()
+
+    # Check if 'Website Redirect' column is already populated
+    for i, redirect_url in enumerate(redirect_urls):
+        if redirect_url and validators.url(redirect_url):
+            raw_urls[i] = redirect_url
+
+    # Process the URLs asynchronously
+    sanitized_urls = [initial_processing(url) for url in raw_urls]
+    valid_urls = [url for url in sanitized_urls if validators.url(url)]
+
+    # Run the asynchronous function using asyncio.run()
+    loop = asyncio.get_event_loop()
+    final_urls = loop.run_until_complete(process_urls(valid_urls))
+
+    # Update 'Website Redirect' column in the CSV file with final URLs
+    update_redirect_urls(file_path, valid_urls, final_urls)
+
+    print("Final URLs have been added to the 'Website Redirect' column in the CSV file.")

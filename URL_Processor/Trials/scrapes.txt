@@ -1,0 +1,104 @@
+save:
+
+from bs4 import BeautifulSoup
+import requests
+
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By 
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+from typing import Dict, List
+import re
+import urllib.parse as up
+
+def bs4_scrape(response_text):
+    soup = BeautifulSoup(response_text,'html.parser')
+    
+    if soup.nav:
+        # Loop through the nav and visit pages
+        for nav_child in soup4.nav.children:
+            if ('About Us' in str(nav_child)):
+                html_about = requests.get(nav_child.find('a')['href']).text
+                soup_about = BeautifulSoup(html_about,'html.parser')
+                about_text = soup_about.get_text("|",strip=True).split("|")
+                two_longest = sorted(about_text,key=len)[-2:]
+                print(about_text)
+            print(type(nav_child))
+    else:
+        # Visit every seemingly relevant href on the page
+        print('1')
+        
+def bs4_page_scrape(url):
+    page_text = requests.get(url).text
+    text_soup = BeautifulSoup(page_text, 'html.parser')
+    text_array = text_soup.get_text("|",strip=True).split("|")
+    return sorted(text_array,key=len)[-2:]
+
+def selenium_page_scrape(url):
+    driver = webdriver.Chrome()
+    driver.get(url)    
+    page_text = driver.find_element("xpath","/html/body").text
+    # TODO: split on any whitespace (\n)?
+#     print(page_text,page_text.split("\n"),len(page_text.split("\n")),len(page_text.split()),len(re.split(r'[\n\t]+',page_text)))
+    page_array = re.split(r'[\n\t]+',page_text)
+#     print('sort',sorted(page_array,key=len))
+    h1s = driver.find_elements("xpath","//h1")
+    h2s = driver.find_elements("xpath","//h2")
+    h1_texts = [h1.text for h1 in h1s if h1]
+    h2_texts = [h2.text for h2 in h2s if h2]
+    driver.close()
+    return {'text':sorted(page_array,key=len)[-2:],'headers':h1_texts+h2_texts}
+
+def selenium_nav_scrape(url):
+    driver = webdriver.Chrome()
+    driver.get(url)
+    navs: List[str] = driver.find_elements("xpath","//nav")
+    # 1. Find the navs (List[str])
+    # 2. clean out empties
+    # 3. Split each one by [\n\t]+ then spread onto array
+    navs_clean = [nav.text for nav in navs if nav]
+    navs_w = [re.split(r'[\n\t]+',nav) for nav in navs_clean]
+    print(navs_w, flatten(navs_w))
+#     navs_flattened = [c for nav_list in navs_w for c in nav_list if hasattr(nav_list,'__iter__') else [nav_list]]
+#     print(navs_flattened)
+#     navs_text = list(filter(None,[re.split(r'[\n\t]+',nav.text) for nav in navs if nav]))
+    driver.close()
+#     print(navs_text)
+    
+def flatten(a):
+    return [c for b in a for c in flatten(b)] if hasattr(a, '__iter__') else [a]
+        
+def selenium_scrape(url) -> Dict[str,str]:
+    url_results = {}
+    
+    #
+    # Scrape home page
+    home_page_obj = selenium_page_scrape(url)
+    url_results['home_page'] = home_page_obj
+    
+    if False:
+        # XPath - typically unreliable but not with relative path
+        atag_elems = driver.find_elements("xpath", "//a[@href]")
+        for elem in atag_elems:
+            print(elem.get_attribute("href"))
+            if (elem.get_attribute("href") == 'https://cessco.ca/pressure-vessel-fabrication/'):
+        #         and elem.is_displayed() and elem.is_enabled()):
+                print(elem.id)
+                inner_driver = webdriver.Chrome()
+                inner_driver.get(elem.get_attribute("href"))
+                h1 = inner_driver.find_element(By.TAG_NAME,"h1")
+                inner_driver.close()
+                break
+
+        page_text = driver.find_element("xpath", "/html/body").text
+        print('closing')
+        driver.close()
+        page_text
+    
+    return url_results
+
+
+selenium_nav_scrape('https://www.ripoffreportremovalhelp.com/')
