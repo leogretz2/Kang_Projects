@@ -1,0 +1,314 @@
+import asyncio
+import aiohttp
+import pandas as pd
+from urllib.parse import urlparse
+import validators
+import time
+from concurrent.futures import ThreadPoolExecutor
+
+nest_asyncio.apply()
+
+# Initialize Selenium drivers for each type of task
+def init_driver_pool(size):
+    return [webdriver.Chrome() for _ in range(size)]
+
+# Close all drivers in the pool
+def close_driver_pool(driver_pool):
+    for driver in driver_pool:
+        driver.quit()
+
+async def capture_redirect(session, url, semaphore, executor) -> list[str,str]:
+    async with semaphore:
+        print('URL',url)
+        try:
+            # First, attempt to scrape using aiohttp
+            async with session.get(url, allow_redirects=True, timeout=50) as response:
+                if response.status//100 == 2:
+                    response_text = await response.text()
+                    bs4_result = bs4_scrape(url, response_text)
+                    if bs4_result == 'BS4 Nav list unavailable':
+                        raise Exception('BS4 doesn\'t know where to go')
+                    return [response.url, 'bs4',bs4_result]
+                    # return bs4_result
+                else:
+                    raise Exception(f"Non-200 response -> {response.status}")
+        # Catch errors
+        except asyncio.TimeoutError as te:
+            return ['Timeout_Error', 'invalid']
+        except aiohttp.ClientError as ce:
+            return ['Client_Error', 'invalid']
+        except ValueError as ve:
+            return ['Value_Error', 'invalid']
+        except Exception as e:
+            print(f'Error with {url}: {e}')
+            return [response.url, 'selenium']
+            # Fallback to Selenium scraping within the thread pool executor
+            loop = asyncio.get_event_loop()
+            return await loop.run_in_executor(executor, lambda: sel_scrape(url))
+        
+def nav_scrape(final_url, session, semaphore, executor, driver_pool) -> list[list[tuple[str, str]],str]:
+    # response = requests.get(final_url)
+    # soup = BeautifulSoup(response.text, 'html.parser')
+    print('DRIVER',final_url)
+    nav_driver = driver_pool.pop() if not driver_pool else webdriver.Chrome()
+    nav_driver.get(final_url)
+    ret = sel_nav_scrape(nav_driver)
+    driver_pool.push(nav_driver)
+    return ret
+
+def home_page_scrape(final_url, session, semaphore, executor, driver_pool):
+    home_driver = driver_pool.pop() if not driver_pool else webdriver.Chrome()
+    home_driver.get(final_url)
+    ret = sel_pages_scrape(home_driver, [final_url])[0]
+    driver_pool.push(home_driver)
+    return ret
+
+def first_page_scrape(first_url, session, semaphore, executor, driver_pool):
+    first_driver = driver_pool.pop() if not driver_pool else webdriver.Chrome()
+    first_driver.get(first_url)
+    ret = sel_pages_scrape(first_driver, [first_url])[0]
+    driver_pool.push(first_driver)
+    return ret
+
+
+# Coordination point of website scraping
+async def main_async(url):
+    MAX_CONCURRENT_REQUESTS = 1000
+    semaphore = asyncio.Semaphore(MAX_CONCURRENT_REQUESTS)
+    executor = ThreadPoolExecutor(max_workers=10)
+    driver_pool = [webdriver.Chrome()]*10
+    async with aiohttp.ClientSession() as session:
+        redirect_task = asyncio.create_task(capture_redirect(session, url, semaphore, executor))
+        redirect_return = await redirect_task
+        final_url, scrape_type = redirect_return[:2]
+        # bs4_result acquired
+        if scrape_type == 'bs4':
+            return {'website_redirect': final_url, **redirect_return[2]}
+        elif scrape_type == 'invalid':
+            return return_invalid_url_object(final_url)
+        
+        nav_task = asyncio.create_task(nav_scrape(final_url, session, semaphore, executor, driver_pool))
+        home_task = asyncio.create_task(home_page_scrape(final_url, session, semaphore, executor,driver_pool))
+
+        # Await nav_task to ensure nav_info is available for first_page_scrape
+        nav_info = await nav_task
+        first_page_task = asyncio.create_task(first_page_scrape(nav_info[-1], session, semaphore, executor, driver_pool))
+
+        # Await all tasks and collect results
+        home_page_data, first_page_data = await asyncio.gather(home_task, first_page_task)
+        # TODO: unnecessary because the data is already there?
+        headers = home_page_data['headers'] + first_page_data['headers']
+        print(f'{url} processed.')
+        return {'website_redirect': final_url,'nav':nav_info[:-1], 'home_page':home_page_data, 'first_page': first_page_data, 'headers':headers}
+
+async def main_async2(input_urls):
+    tasks = []
+    scrape_tasks = []
+    scrape_results = {}
+    final_urls = []
+    driver_pool = []
+    MAX_CONCURRENT_REQUESTS = 1000
+    semaphore = asyncio.Semaphore(MAX_CONCURRENT_REQUESTS)
+    executor = ThreadPoolExecutor(max_workers=10)
+    async with aiohttp.ClientSession() as session:
+        for url in input_urls:
+            # Capture redirect and determine scraping type
+            try:
+                async with session.get(url, allow_redirects=True, timeout=15) as response:
+                    print('Rst',response.status)
+                    if response.status//100 == 2:
+                        response_text = await response.text()
+                        bs4_result = bs4_scrape(url, response_text)
+                        if bs4_result == 'BS4 Nav list unavailable':
+                            # Selenium
+                            raise Exception('BS4 doesn\'t know where to go')
+                        return bs4_result
+                    else:
+                        raise Exception(f"Non-200 response -> {response.status}")
+            except Exception as e:
+                print(f'Error with {url}:',url, e)
+                # Fallback to Selenium scraping within the thread pool executor
+                loop = asyncio.get_event_loop()
+                return await loop.run_in_executor(executor, lambda: sel_scrape(url))
+            current_redirect = asyncio.create_task(check_url(session, url, semaphore))
+            tasks.append(task)
+        redirect_urls = await asyncio.gather(*tasks)
+
+        scrape_results['website_redirect'] = redirect_urls
+
+        # Construct list of final_urls
+        for i, redirect_url in enumerate(redirect_urls):
+            current_url, current_data = '', {}
+            if redirect_url and validators.url(redirect_url):
+                current_url = redirect_url
+            # TODO: this is to retry link, I should have (misplaced?) faith in the Website Redirect script
+            elif input_urls[i]:
+                if redirect_url in ['Client Error', 'Timeout Error', 'Value Error']:
+                    current_url = 'Invalid_URL'
+                elif validators.url(input_urls[i]):
+                    current_url = input_urls[i]
+            else:
+                # Both the redirect_url and the backup_url are either nonexistent or invalid
+                # TODO: Add this functionality back in through bs4/sel
+                # scrapes += [{'nav':'Broken link','headers': '', 'home_page':'','first_page':''}]
+                current_url = 'Invalid_URL'
+                continue
+            final_urls.append(current_url)
+
+        print('finals',redirect_urls,final_urls)
+
+        # Schedule scraping tasks for each final URL
+        scraping_tasks = [scrape_website(session, url, semaphore, executor) for url in final_urls]
+        scrape_results = await asyncio.gather(*tasks)
+
+        # Combine redirect and scrape results
+        website_results = [{'website_redirect':redirect, **scrape_results[i]} for i, redirect in enumerate(redirect_urls)]
+
+        return website_results
+
+
+
+
+
+
+
+        for url in final_urls:
+            # Start nav_task that gets navs (create driver first and input to be used if Selenium required)
+            # Start first_page_task that awaits nav_task before starting
+            #
+
+
+
+            if validators.url(url):
+                scrape_task = asyncio.create_task(scrape_website(session, url, semaphore, executor))
+                scrape_tasks.append(scrape_task)
+            else:
+                scrape_task = asyncio.create_task(return_invalid_url_object(url))
+                scrape_tasks.append(scrape_task)
+        scrape_results = await asyncio.gather(*scrape_tasks)
+
+        # Consolidate redirects and scrape results
+        # scrape_results = await asyncio.gather(*scrape_tasks)
+
+        # print('arrs',len(redirect_urls),redirect_urls,'SCRAPER',scrape_results, len(scrape_results))
+
+
+        # print('scres',scrape_results, redirect_urls)
+        # print('wbres',website_results)
+
+        # Return list of tuples with (Website_redirect, nav, headers, home_page, first_page)
+        return website_results
+    
+
+async def threaded_main():
+    start_time = time.time()
+    # Excel index = 2 + this index
+    start, stop = 239,250
+    if stop <= start:
+        print('Start must be strictly less than stop')
+        return 1
+    index_range = slice(start, stop)
+
+    # Load your URLs from a file or list
+    file_path = './Excel_Sheets/Website_Redirects_230919.csv'
+    df = pd.read_csv(file_path, low_memory=False)
+    raw_urls = df['Website'][index_range].tolist()
+    if 'Website Redirect' in df:
+        redirect_urls = df.get('Website Redirect', pd.Series(dtype=str)).tolist()[index_range]
+
+    # Check if 'Website Redirect' column is already populated (with valid URL)
+    for i, redirect_url in enumerate(redirect_urls):
+        if redirect_url and validators.url(redirect_url):
+            raw_urls[i] = redirect_url
+
+    sanitized_urls = [initial_processing(url) for url in raw_urls]
+    valid_urls = [url if validators.url(url) else '' for url in sanitized_urls]
+
+    scrape_tasks = []
+    for url in valid_urls:
+        # returns single scrape_result
+        scrape_task = asyncio.create_task(main_async(url))
+        scrape_tasks.append(scrape_task)
+    scrape_results = await asyncio.gather(*scrape_tasks)
+
+    print('scrrr',type(scrape_results),type(scrape_results[0]), scrape_results)
+
+    # loop = asyncio.get_event_loop()
+    # scrape_results = loop.run_until_complete(main_async(valid_urls))
+
+    update_scrape_results(file_path, scrape_results, index_range)
+
+    print(f"Completed in {time.time() - start_time} seconds. Excel updated.")
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(threaded_main())
+
+
+
+
+
+
+def initial_processing(url):
+    if not url or url != url or pd.isna(url):
+        return ''
+    
+    # Sanitize URL
+    corrected_url = sanitize_url(url)
+    return corrected_url
+
+# Function to sanitize/correct URLs missing pieces
+def sanitize_url(url):
+    # Parse URL to correct any issues then reconstruct
+    parsed_url = urlparse(url)
+
+    if not parsed_url.scheme:
+    # Assume http scheme
+        corrected_url = 'http://'+parsed_url.netloc + parsed_url.path + parsed_url.params + parsed_url.query + parsed_url.fragment
+    else:
+        corrected_url = parsed_url.geturl()
+
+    return corrected_url
+
+async def check_url(session, url, semaphore):
+    async with semaphore:
+        try:
+            async with session.head(url, allow_redirects=True, timeout=100) as response:
+                return str(response.url) # Return final URL as string
+        # Catch errors
+        except asyncio.TimeoutError as te:
+            return 'Timeout Error'
+        except aiohttp.ClientError as ce:
+            return 'Client Error'
+        except ValueError as ve:
+            return 'Value Error'
+        
+async def capture_url_redirects(urls, MAX_CONCURRENT_REQUESTS):
+    print(f"processing {len(urls)} urls")
+    semaphore = asyncio.Semaphore(MAX_CONCURRENT_REQUESTS)
+    async with aiohttp.ClientSession() as session:
+        tasks = [check_url(session, url, semaphore) for url in urls]
+        results = await asyncio.gather(*tasks)
+        return results
+    
+async def return_invalid_url_object(url):
+    return {'website_redirect': url, 'nav': 'Invalid_URL','home_page':{},'first_page':{},'headers':[]}
+
+def update_redirect_urls(file_path, index_range, redirect_urls):
+    df = pd.read_csv(file_path, low_memory=False)
+    new_list = list(df['Website Redirect'][:index_range.start]) + redirect_urls + list(df['Website Redirect'][index_range.stop:])
+    df['Website Redirect'] = new_list
+    df.to_csv(file_path, index=False)
+
+def construct_df_col(df, col_name: str, scrape_col: list, index_range: slice, col_exists: bool):
+    if col_exists:
+        return list(df[col_name][:index_range.start]) + scrape_col + list(df[col_name][index_range.stop:])
+    else:
+        return ['']*index_range.start + scrape_col + ['']*(len(df)-index_range.stop)
+
+def update_scrape_results(file_path: str, scrape_results: list[dict], index_range: slice):
+    df = pd.read_csv(file_path, low_memory=False)
+    # TODO: Add 'Metadata' here when ready
+    for column in ['Website Redirect','Nav','Headers','Home Page','First Page']:
+        isolated_col = [result['_'.join(column.lower().split(' '))] for result in scrape_results]
+        df[column] = construct_df_col(df, column, isolated_col, index_range, column in df)
+    df.to_csv(file_path, index=False)
