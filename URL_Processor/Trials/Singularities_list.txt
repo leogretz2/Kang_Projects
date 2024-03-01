@@ -10,13 +10,3 @@ graphen.ai
 kratoscap
 cosmonet
 porticos
-
-
-Hey Michael, I wanted to reach out so it's not radio silence. I've gotten the script working with multiple threads, but the processing time is still substantial (around 91 hours).
-
-So with 250,000 URLs, 2 pages per URL and an average 2MB per page, that's 1,000GB (1TB) of data to be scraped.
-For an average wifi speed of 12.5 MB/s, that's around 1000GB*1024(MB/GB)/12.5(MB/s) = 81,920s for downloading the data. 
-And for an average scraping of 0.5s per page for scraping, that's 1000GB*1024(MB/GB)/2(MB/page)*0.5(s/page) = 256,000s for scraping the data. So (80,000 + 250,000 seconds)/3600(seconds/hour) = 91 hours.
-
-I'm just using my own computer with 16GB RAM and an i7 processor, but with more compute power, I could use additional parallel threads and browsers for spraping more effectively, reducing the time. In the meantime, I can keep grinding through the URLs, I wanted to update you on my progress.
-
