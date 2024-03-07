@@ -1,5 +1,5 @@
 ### Overview
-This Web_Exploration's goal is a Python script meant to grab a list of 250,000 URLs from a local Excel sheet, gather the redirect and scrape relevant information from the pages 
+This URL Processor is a Python script meant to grab a list of 250,000 URLs from a local Excel sheet, gather the redirect and scrape relevant information from the pages 
 for each one, package it into an object and send the result object back to the Excel sheet.
 
 ### Procedure
