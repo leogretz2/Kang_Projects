@@ -155,6 +155,12 @@ async def capture_redirect(session, url, semaphore, executor): # -> list[str,str
             return ['Selenium','selenium']
             # return [url, 'selenium']
         
+def sel_nav_scrape(driver):
+    return 6
+
+def sel_pages_scrape(driver, urls):
+    return 4
+
 async def nav_scrape(final_url, session, semaphore, executor, driver_pool): #-> list[list[tuple[str, str]],str]:
     nav_driver = await driver_pool.get()
     nav_driver.get(final_url)
