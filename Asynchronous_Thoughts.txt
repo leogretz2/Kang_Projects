@@ -1,0 +1,13 @@
+Asynchronous Thoughts
+
+Looping through valid_urls, scrape_url_async for each one.
+
+On a high level, for each one, get the text content of two pages. This involves getting to the home page, scraping the content of the home page, scraping the nav off the home page, then scraping the first page of the website with the first valid URL returned from the nav. A valid URL is one that has the same netloc as the home page, but is not equivalent to the original URL.
+
+To get to the home page, make 1 aiohttp GET request. 
+	If it returns back well (no forbidden, check robots.txt?), then no cookie is required - go through the 	rest of the list, where an asynchronous task is created for each item, and making 1 additional aiohttp GET 	request for the first page, then return the scrape_result.
+
+	If it doesn't, call pyppeteer, retrieve the relevant cookie(s?) by running the JavaScript in the chromium 	executable, make 2 additional aiohttp GET request with the cookie in the header to the home page (do the 	nav calculation from this) and to the first page. Return the scrape_result after these three tasks finish.
+
+How can Azure Functions optimize this?
+In the case that the website gets blocked (around 60% of the time), need a much faster process. Azure pricing is based on executions for Azure Functions (regardless of the contents). The first request for each URL is made asynchronously (in batches). Then, for each URL, execute a serverless Azure function to call pyppeteer, get the cookie for the URL and note the final (redirect) URL. Using the cookie as a header for the GET request to the final URL, scrape the home page and call the nav task to find the first relevant URL (do these two asynchronously). Return the cookie, first relevant URL, redirect_url, nav, and home page scrape result from the Azure Function. Back in local, use the cookie and first relevant URL to make an aiohttp GET request to the first page and scrape the resulting HTML. Add this first page scrape result to the return.

@@ -1,0 +1,11 @@
+1. Need Macros to be enabled from files downloaded from the internet: TODO - in the settings
+2. Need to have reference to the PowerPoint object library enabled in Excel. You can do this by going to the VBA editor in Excel, clicking on "Tools" -> "References" and then checking "Microsoft PowerPoint Object Library".
+
+LastRow: 5, LastColumn:38
+
+Is Main always there?
+Is Calculation on Automatic?
+Take off Protected
+Data Table is not standardized (Excludes fully empty columns? Probably not - Team. Maybe columns always same)
+What's the state of the Cover Page to start?
+Review format of Cover (After 10, split)
