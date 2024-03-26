@@ -1,4 +1,4 @@
-Attribute VB_Name = "Automated_Macro"
+Attribute VB_Name = "Test_Macro"
 
 Sub FormatCopyAutomated()
 
@@ -11,6 +11,7 @@ Sub FormatCopyAutomated()
     Dim pptPath As String
         
     Dim lastRow As Long
+    Dim rowsFilled As Long
     Dim i As Long
     Dim companyInfo() As Variant
     
@@ -24,20 +25,22 @@ Sub FormatCopyAutomated()
     lastRow = dataWS.Cells(dataWS.Rows.Count, 1).End(xlUp).Row
     
     ReDim companyInfo(1 To lastRow, 1 To 2)
+    rowsFilled = 0
     
-    For i = 2 To 2 ' lastRow ' Assuming row 1 has headers
+    For i = 2 To lastRow ' Assuming row 1 has headers
         Dim rowData As New CompanyData
-        RowToNewSheet dataWS, i, rowData, ppPres, pptPath
+        RowToNewSheet dataWS, i, rowData, ppPres, pptPath, lastRow
         
-        ' Add company info from rowData to array
+        ' Add company info from rowData to company info array
         companyInfo(i - 1, 1) = rowData.CompanyName
         companyInfo(i - 1, 2) = rowData.UpgradedBy
+        rowsFilled = rowsFilled + 1
 
     Next i
     
     ' Populate and export cover page
-    PopulateCover coverWS, companyInfo
-    ExportCoverPageToPowerPoint ppPres, lastRow - 1, pptPath
+    PopulateCover coverWS, companyInfo, rowsFilled
+    ConsolidatedPowerPointExport "Cover", ppPres, rowsFilled, pptPath, 20, 40, 1
     
     ' Clean up
     Set ppPres = Nothing
@@ -47,7 +50,7 @@ Sub FormatCopyAutomated()
     
 End Sub
 
-Sub RowToNewSheet(ws As Worksheet, Row As Variant, rowData As CompanyData, ppPres As PowerPoint.Presentation, pptPath As String)
+Sub RowToNewSheet(ws As Worksheet, Row As Variant, rowData As CompanyData, ppPres As PowerPoint.Presentation, pptPath As String, NumCompanies As Long)
     
     ' Construct CompanyData
     ConstructCompanyData ws, Row, rowData
@@ -56,12 +59,9 @@ Sub RowToNewSheet(ws As Worksheet, Row As Variant, rowData As CompanyData, ppPre
     Dim newSheet As Worksheet
     Set newSheet = CreateNewSheet(rowData.CompanyName)
     
-    ' Assign values to new Sheet
-'    SimpleCell newSheet, rowData
+    ' Assign values to new Sheet and export
     AssignValuesToSheet newSheet, rowData
-    
-    ' Export Sheet to Powerpoint (pass a sheet and rowData?)
-    ExportCompanyPageToPowerPoint rowData.CompanyName, ppPres, pptPath
+    ConsolidatedPowerPointExport rowData.CompanyName, ppPres, NumCompanies, pptPath, 0, 50, ppPres.Slides.Count + 1
     
         
 End Sub
@@ -158,14 +158,28 @@ Sub AssignValuesToSheet(targetSheet As Worksheet, rowData As CompanyData)
     End If
 End Sub
 
-Sub PopulateCover(coverSheet As Worksheet, companyInfoArr As Variant)
-    Dim NumCompanies As Integer
-    Dim Row As Integer
-    Dim Col As Integer
-    Dim Half As Integer
-    NumCompanies = UBound(companyInfoArr, 1)
+Sub ClearCoverPage(ws As Worksheet)
+    ' Define the range to clear: Columns B through H starting from row 13 downwards
+    ' Assuming the sheet might not be filled entirely to the last row of Excel, find the last used row in this range
+    Dim lastRow As Long
+    lastRow = ws.Cells(ws.Rows.Count, "H").End(xlUp).Row
+    
+    ' If the last used row is less than 13, there's nothing to clear
+    If lastRow < 13 Then Exit Sub
+    
+    ' Clear contents of the range
+    ws.range("B13:H" & lastRow).ClearContents
+End Sub
+
+Sub PopulateCover(coverSheet As Worksheet, companyInfoArr As Variant, NumCompanies As Long)
+    Dim Row As Long
+    Dim Col As Long
+    Dim Half As Long
     
     Half = IIf(NumCompanies <= 20, 10, IIf(NumCompanies Mod 2 > 0, NumCompanies \ 2 + 1, NumCompanies \ 2))
+    
+    ' Clear cover range for testing
+    ClearCoverPage coverSheet
         
     For i = 1 To NumCompanies
         If i <= Half Then
@@ -183,7 +197,7 @@ Sub PopulateCover(coverSheet As Worksheet, companyInfoArr As Variant)
 
 End Sub
 
-Sub TakeScreenshot(range As range)
+Sub TakeScreenshot(range As Excel.range)
     ' Copy the range as an image
     On Error Resume Next ' Disable error reporting
     For i = 1 To 3 ' Attempt to copy up to three times
@@ -204,7 +218,15 @@ Sub AddSlideAndPaste(ppPres As PowerPoint.Presentation, Left As Integer, Top As 
     Set ppSlide = ppPres.Slides.Add(Position, 12) ' 12 corresponds to a blank slide
     
     ' Paste the image into the slide
-    ppSlide.Shapes.PasteSpecial DataType:=2 ' 2 corresponds to pasting as a picture
+    On Error Resume Next
+    Application.Wait (Now + TimeValue("0:00:01")) ' Wait for 1 second
+    ppSlide.Shapes.PasteSpecial DataType:=2 ' Trying paste operation
+    If Err.Number <> 0 Then
+        MsgBox "Failed to paste screenshot. Please try again.", vbCritical
+    End If
+    On Error GoTo 0
+    
+'    ppSlide.Shapes.PasteSpecial DataType:=2 ' 2 corresponds to pasting as a picture
     
     ' Optionally, adjust the position and size of the pasted image as needed
     Set myShape = ppSlide.Shapes(ppSlide.Shapes.Count)
@@ -212,51 +234,25 @@ Sub AddSlideAndPaste(ppPres As PowerPoint.Presentation, Left As Integer, Top As 
     myShape.Top = Top
 End Sub
 
-Sub ExportCoverPageToPowerPoint(ppPres As PowerPoint.Presentation, NumCompanies As Long, pptPath As String)
-
-    ' Define workbook
-    Dim wb As Workbook
-    Dim ws As Worksheet
-    Dim addString As String
-    Set wb = ThisWorkbook
-    Set ws = wb.Worksheets("Cover")
-    ws.Activate
-    
-    ' Determine the range to copy
-    If NumCompanies <= 10 Then
-        addString = "D29"
-    ElseIf NumCompanies <= 20 Then
-        addString = "I29"
-    Else
-        addString = "I" & (13 + NumCompanies \ 2)
-    End If
-    
-    Dim rng As Excel.range
-    Set rng = ws.range("A1:" & addString)
-    
-    TakeScreenshot rng
-    AddSlideAndPaste ppPres, 20, 40, 1
-    
-    ppPres.SaveAs pptPath
-
-End Sub
-
-Sub ExportCompanyPageToPowerPoint(SheetName As String, ppPres As PowerPoint.Presentation, pptPath As String)
-
+Sub ConsolidatedPowerPointExport(SheetName As String, ppPres As PowerPoint.Presentation, NumCompanies As Long, pptPath As String, Left As Integer, Top As Integer, Position As Integer)
     ' Define workbook
     Dim wb As Workbook
     Dim ws As Worksheet
     Set wb = ThisWorkbook
     Set ws = wb.Worksheets(SheetName)
+    Dim rng As Excel.range
+    Dim addString As String
+    
     ws.Activate
     
-    ' Define the range you want to copy
-    Dim rng As Excel.range
-    Set rng = ws.range("A1:H29")
+    ' Determine range
+    addString = IIf(SheetName = "Cover", IIf(NumCompanies <= 10, "D29", IIf(NumCompanies <= 20, "I29", "I" & (13 + NumCompanies \ 2))), "H29")
+    Set rng = ws.range("A1:" & addString)
     
     TakeScreenshot rng
-    AddSlideAndPaste ppPres, 0, 50, ppPres.Slides.Count + 1
+    AddSlideAndPaste ppPres, Left, Top, Position
     
     ppPres.SaveAs pptPath
-
+    
 End Sub
+

@@ -1,15 +1,24 @@
-1. Need Macros to be enabled from files downloaded from the internet: TODO - in the settings
-2. Need to have reference to the PowerPoint object library enabled in Excel. You can do this by going to the VBA editor in Excel, clicking on "Tools" -> "References" and then checking "Microsoft PowerPoint Object Library".
-3. Cover Page formatting is off for rows 29 on in Col C(3) and 25 on in Col F(6). So max 24 companies.
-4. Can't have companies with same name or empty rows at the bottom of the table, because sheet names are Company Names and cannot repeat sheet names. Make it numbered, replace, or skip processing and take screenshot?
-5. Put a check on Latest Raised to not display if it's $0 (does this have some significance?).
+Instructions/Discussion:
+1. Copy files into sheet:
+	a. Open the Excel Workbook and dismiss warning about files downloaded from internet.
+	b. View > Macros > View Macros > Edit (Opens VBA editor)
+	c. In small window top left (Project - VBA Project), scroll to bolded Excel Workbook name
+	d. Right click on wb name > Insert > Module, Paste entire Macro code into the empty window that opens. 	Rename this macro in the small window bottom left (Properties - Module2) and edit where it says 	(Name) Module2 by double clicking Module2. Call it 'Test_Macro' or whatever you want.
+	e. Right click on file name again > Insert > Class Module, Paste <CompanyData object> into the empty 	window that opens. Rename this class in the small window bottom left (Properties - Class1) and edit 	where it says (Name) Class1 by double clicking. Call it CompanyData.
+	f. Ctrl+S then go back to the sheet, right click on the button in Main > Assign Macro and find the macro 	you just renamed in the list in the middle of the pop up window.
+2. Need Macros to be enabled from files downloaded from the internet:
+	a. Right click on excel file in File Explorer > Properties > Security section, Check Unblock
+3. Need to have reference to the PowerPoint object library enabled in Excel. You can do this by going to the VBA editor in Excel, clicking on "Tools" -> "References" and then checking "Microsoft PowerPoint 16.0 Object Library".
+4. Cover Page formatting is off for rows 29 on in Col C(3) and 25 on in Col F(6). So max 24 companies.
+5. Can't have companies with same name or empty rows at the bottom of the table, because sheet names are Company Names and cannot repeat sheet names. Make it numbered, replace, or skip processing and take screenshot?
+6. Put a check on Latest Raised to not display if it's $0. Does this have some significance?
+7. Can create Presentation with a subset of the data by editing 'lastRow' in this line in FormatCopyAutomated():
+	For i = 2 To lastRow ' Assuming row 1 has headers
+8. Didn't send me new URL list
 
-Note: Can't have two companies with the same name. Is this a problem?
-LastRow: 5, LastColumn:38
 
+Questions:
+Can't have two companies with the same name. Is this a problem?
 Is Main always there?
-Is Calculation on Automatic?
-Take off Protected
 Data Table is not standardized (Excludes fully empty columns? Probably not - Team. Maybe columns always same)
 What's the state of the Cover Page to start?
-Review format of Cover (After 10, split)
