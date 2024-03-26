@@ -1,6 +1,10 @@
 1. Need Macros to be enabled from files downloaded from the internet: TODO - in the settings
 2. Need to have reference to the PowerPoint object library enabled in Excel. You can do this by going to the VBA editor in Excel, clicking on "Tools" -> "References" and then checking "Microsoft PowerPoint Object Library".
+3. Cover Page formatting is off for rows 29 on in Col C(3) and 25 on in Col F(6). So max 24 companies.
+4. Can't have companies with same name or empty rows at the bottom of the table, because sheet names are Company Names and cannot repeat sheet names. Make it numbered, replace, or skip processing and take screenshot?
+5. Put a check on Latest Raised to not display if it's $0 (does this have some significance?).
 
+Note: Can't have two companies with the same name. Is this a problem?
 LastRow: 5, LastColumn:38
 
 Is Main always there?
