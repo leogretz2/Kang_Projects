@@ -26,6 +26,3 @@ Public Employees As String
 Public LatestRaisedDate As String
 Public LatestRaised As String
 Public TotalRaised As String
-
-
-

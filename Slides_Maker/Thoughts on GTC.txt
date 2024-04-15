@@ -1,0 +1,162 @@
+Thoughts on GTC:
+
+- 3D perception of robots is good now. Can process at fast enough speed to react real time (videos don't do it justice, it was crazy seeing the robots in the expo hall - dog, bartender).
+- Genomics is a focus of GenAI, talked to some people focusing on converting their use of XGBoost to GPT or other LLMs. Also talked with someone whose research had consisted of mapping out the entire aorta based on putting LLM on above head scans and then used for identifying weaknesses at the bifurcations. Broader medical field applications as well - lowering barrier to entry for medical help, saw an app where someone pretended to be an older woman and got real time advice on what she should do given her medical background/ailments). Research about GenAI applications in drug discovery/design (Innoplexus). Oncology applications (Etcembly, T cell receptor to picomolar affinity). ECG signal recognition (Innoplexus, AnHorn Medicines, Asan Medical Center). De Novo Molecule Generation, Small Molecule Generation (Innoplexus). Lot's of simulation prediction, molecular modeling. Some real time operation optimizations based on streamed images. Predicting stroke and MS in patients based on profile.
+- Many Enterprise Solutions, companies focused on that -> CRM, HPC Quantitative Finance, OCI Systems using NVIDIA GPUs
+- CVPR IEEE and CES Conventions to learn more about the space.
+- Went to NVIDIA office, spoke to a team lead on the autonomous vehicles team (NVIDIA bought out startup).
+- Key Note was heavily focused on the hardware/souped up GPU they released (H100 Blackwell).
+- Many people there to figure out what GenAI does.
+- Food delivery with autonomous vehicles.
+- Big emphasis on democratization of LLMs and software engineering for everyone to use it. DLI Trainings, trying to have everyone use their platform. Hugging Face, GPU rich, rent cloud GPUs, local LLMs -> leads to discussion of security. That is going to be a big consideration with all this information flowing around as well. May be the reentry point for Blockchain technology.
+- Some interesting terms to check out further: GANs, VAEs,
+- Posters discussing music, furniture modeling, education, and beautiful AI art all over the place. 
+
+Sagemath
+innoplexus
+3D perception good now
+planning/picking up is the challenge
+-genomics (paz)
+-weka (ron, ai storage performance)
+Trainings
+
+sagemath - matlab
+
+frank zappa
+
+CVPR IEEE
+
+49:
+somebody passed on sagemount business trip
+support some product, production type build -> know how to output a result, can move up into VP
+
+After 20 companies new cover page, same pattern.
+
+Need start, reset button on macro. Just going to send Workbook to colleague.
+
+Whip up a RAG model
+
+Developers are not going to go away, just going to have AI as a necessary tool.
+How to train a RAG model? Inject right before. Vector database. How to deploy RAG model, technologies involved.
+Already have third party AI consultancy for building company-wide instance, hiring another firm to build RAG model -> he said I can hop on that and get involved with training/using the model.
+ML Engineer low barrier to entry - data proprietary, need foundational (statistics). Avoid PhD for ML Leads. scaling correctly, bigger picture
+Understands data, infrastrucutre, development, spin up PoCs. Between data science, product
+Master's course to brush up 
+standard coder at more risk
+
+
+
+bryan
+thursday khalil
+
+LAR
+
+GAN - Generative Adversarial Network. Two neural nets adjusting weights based on each other. Generator trying to trick the Assessor.
+
+EG3D
+ayman - aorta segmentation
+
+CUDA
+
+ansys, synopsis, cadence
+NVLink Switch - 1.8TB/s
+
+NVIDIA Inference Microservices (NIM)
+
+omniverse cloud
+
+slurm
+
+LLC
+
+ai.nvidia.com
+
+ZapataAI - quantum computing drug discovery, QCBM. CUDA Quantum. 16 qubits
+
+geopandas, shapely.geometry
+MonAI Label server
+RAPIDS speed up
+linspace (fp intervals)
+
+RAG Pipeline pres slides (use case first, NIMs)
+
+Renewable energy compute
+
+onprem resurgence because cloud doesn't scale well for everything. Hybrid approach
+
+cooperatition
+
+healthcare so slow because of so many stakeholders than need to approve: hospital, physician, FDA, insurance, gov
+-medtech: FDA blocker so work back from end goal, focus on product
+
+scrape sec 10k files
+
+prabhu ramamoorthy - NVIDIA + Oracle 7x trading speed midday
+
+cuFFTDx (one fused kernel), cuBLAS. CUDA for crazy computing - beta libraries. cuBLASDx
+
+Data for differentiation (algorithms, LLMs commodity) - omniverse practice
+
+TRANSFORMER MODEL
+
+technology always changing but humans always looking to express themselves through art
+
+hippocraticAI - super staffed health care
+
+eric nvidia geo map
+
+pytorch -> triton (better than C++)
+github U-Guide Pytorch contributions
+pytorch compiler
+does pytorch use tensors?
+ties in with numpy
+
+FP8
+GPT4 is 1.8T parameter
+
+sebastien bubeck talk
+
+No More GPU Poor
+The Gradient of Generative AI Release
+https://huggingface.co/papers/2302.04844
+Hugging Face Hub
+optimum-nvidia
+-28x throughput on Llama 2
+FP8 with TensorRT-LLM
+
+pytorch-distributed Nickel, MPI/PGAS
+compression for io
+
+Retrieval Augmentation Generation, Chatbot, Human in the loop
+
+Exhibit Hall Sectors:
+Generative AI
+Health Care& Life Sciences
+XR
+Industrial Digitalization
+MLOps & LLMOps Platforms
+
+a lot of computer vision
+
+Build Al Applications with GPU Vector Databases
+https://courses.nvidia.com/dli-event
+Event code: GTC24_T61772_KH
+
+bad emphasis on education
+genAI not present in photoshop
+
+call ron for job, khalil referral, harish slumberger
+
+GNN
+
+Bryan connections
+NVIDIA successful off of crypto
+
+CV-CUDA
+DeepStream
+occlusion errors
+
+TensorRT_LLM
+
+Confidential AI running encrypted VM in remote data center
+autogen (PM model)

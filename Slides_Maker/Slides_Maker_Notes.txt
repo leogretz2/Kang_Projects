@@ -22,3 +22,8 @@ Can't have two companies with the same name. Is this a problem?
 Is Main always there?
 Data Table is not standardized (Excludes fully empty columns? Probably not - Team. Maybe columns always same)
 What's the state of the Cover Page to start?
+
+
+Notes:
+
+PowerPoint Preferences (allow macros to run)
