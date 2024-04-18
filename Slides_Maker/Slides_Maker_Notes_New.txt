@@ -32,7 +32,7 @@ WINDOWS:
 5. Right click on Modules in the Project Window in the top left > Insert > Class Module. Paste the CompanyData Class in. Rename it CompanyData in the Properties Window in the bottom left > (Name) field
 6. Enable PowerPoint interaction: Tools (in top bar) > References... > Check "Microsoft PowerPoint 16.0 Object Library" > OK
 7. You can either run the macro from the VBA Editor by scrolling to the top SubFunction (FormatCopyAutomated) and pressing F5, or you can create a button on the Main Sheet and tie the button to that SubFunction by right clicking on the button and choosing Macro. Either way a local Presentation with the date will get created (limit on number of companies because of Cover Page formatting).
-8. Note: can't have any PowerPoint Presentations open.
+8. Notes: can't have any PowerPoint Presentations open. If button not working, previous run may still be going -> go to VBA Editor and click Stop button in toolbar.
 
 Questions:
 - Can't have two companies with the same name. Is this a problem?

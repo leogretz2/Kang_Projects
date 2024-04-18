@@ -21,8 +21,6 @@ Sub FormatCopyAutomated()
     ppPath = ThisWorkbook.path & "\Weekly_5s_Review_" & Replace(Date, "/", "") & ".pptx"
     ppPath = GetDirectoryFromPath(GetLocalPath(ThisWorkbook.FullName)) & "\Weekly_5s_Review_" & Replace(Date, "/", "") & ".pptx"
     
-    ' MsgBox "pp" & ppPath
-    
     ' Find the last row of the table
     lastRow = dataWS.Cells(dataWS.Rows.Count, 1).End(xlUp).Row
     
@@ -110,12 +108,8 @@ Function CreateNewSheet(SheetType As String, SheetName As String, SheetIndex As 
     ' If the sheet does not exist, create it
     ' If ws Is Nothing Then
     ' Copy either the "Main" sheet before the second sheet or the "Cover" sheet after the last cover
-    ' TODO remove
     ' TODO: fully clear sheet (Home > Delete Cells)
-    ' MsgBox "tni" & SheetType & SheetName & "i: " & SheetIndex
     ThisWorkbook.Sheets(SheetType).Copy Before:=ThisWorkbook.Sheets(SheetIndex)
-    ' TODO remove
-    MsgBox "asnsn" & ActiveSheet.Name & SheetName
     ActiveSheet.Name = SheetName
     Set ws = ActiveSheet
 
@@ -204,8 +198,6 @@ Sub PopulateExportCovers(coverWS As Worksheet, companyInfoArr As Variant, NumCom
         Else
             ' Create or get the next cover sheet
             Set CoverSheet = CreateNewSheet("Cover", ("Cover" & CoverPageNumber), CoverPageNumber)
-            ' TODO: remove
-            ' MsgBox "cover" & CoverPageNumber & " made" & CoverPageInt
         End If
         
         ClearCoverPage CoverSheet
@@ -283,9 +275,9 @@ Sub ConsolidatedPowerPointExport(SheetName As String, ppPres As PowerPoint.Prese
     Dim rng As Excel.range
     Dim addString As String
     
-    If Left(SheetName, 5) = "Cover" Then
-        MsgBox "Adding Cover"
-    End If
+    'If Left(SheetName, 5) = "Cover" Then
+    '    MsgBox "Adding Cover"
+    'End If
     
     ws.Activate
     
