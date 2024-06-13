@@ -27,12 +27,13 @@ PowerPoint Preferences (allow macros to run)
 WINDOWS:
 1. Open downloaded Excel Sheet
 2. Enable Macros and Select 'Yes' on 'Do you want to make this file a Trusted Document?'
-3. Open VBA editor (View > Macros, Select one and Edit...)
+3. Open VBA editor (View > Macros[on the far right], Select one and Edit...)
 4. Right click on Modules in the Project Window in the top left > Insert > Module. Paste the Macro in. Rename it to FormatCopyAutomated in Properties Window in the bottom left > (Name) field
 5. Right click on Modules in the Project Window in the top left > Insert > Class Module. Paste the CompanyData Class in. Rename it CompanyData in the Properties Window in the bottom left > (Name) field
 6. Enable PowerPoint interaction: Tools (in top bar) > References... > Check "Microsoft PowerPoint 16.0 Object Library" > OK
-7. You can either run the macro from the VBA Editor by scrolling to the top SubFunction (FormatCopyAutomated) and pressing F5, or you can create a button on the Main Sheet and tie the button to that SubFunction by right clicking on the button and choosing Macro. Either way a local Presentation with the date will get created (limit on number of companies because of Cover Page formatting).
-8. Notes: can't have any PowerPoint Presentations open. If button not working, previous run may still be going -> go to VBA Editor and click Stop button in toolbar.
+7. You can either run the macro from the VBA Editor by scrolling to the top SubFunction (FormatCopyAutomated) and pressing F5, or press the button labeled 'Make Presentation' in the 'Main' Sheet.
+8. A local Presentation with the date will get created (if there are more than 20 companies, a new cover page will get made).
+8. Notes: can't have any relevant PowerPoint Presentations open. If button not working, previous run may still be going -> go to VBA Editor and click Stop button in toolbar.
 
 Questions:
 - Can't have two companies with the same name. Is this a problem?
