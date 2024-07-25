@@ -22,5 +22,20 @@ Use " for strings, to account for 's
 725:
 
 privacy doesn't seem to be an issue: https://openai.com/enterprise-privacy/#our-commitments
+API instructions:
+
+1. Make an OpenAI account (straightforward if you have a google email, not bad otherwise).
+2. You get sent to the account dashboard, which is @ https://platform.openai.com/playground/chat?models=gpt-3.5-turbo.
+3. You have to select a project for the API key
+	a. Go to the top left where it says Personal/(No project selected).
+	b. Hover over (No project selected).
+	c. Click on 'Default project' in the pop up
+4. Click API Keys in the left column/menu. It'll ask you to verify your phone number (and you should get some free API credits if it's new).
+5. At the top right, press the green '+ Create new secret key' button, and you can name it whatever you want and hit Create.
+	a. Copy the long key that pops up (it should start with sk-proj-...). If you send that to me, then I querying the API.
+6. You need to set up billing.
+	a. Hover on profile icon in the top left, click 'Your Profile' in the drop down (goes to https://platform.openai.com/settings/profile)
+	b. In the left drop down column of your profile page, click Billing, then the green 'Add payment details' button.
+	c. Then I think you'll be able to set usage limits once the API gets used a bit, if you click on 'Usage limits' on 	https://platform.openai.com/settings/organization/billing/overview
 
 
