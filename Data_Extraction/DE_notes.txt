@@ -1,6 +1,26 @@
 722:
 
-What is units referring to in Revenue Notes?
-Reminder of profitability categories
+qs:
+
+What is units referring to in Revenue Notes? Units sold, as expected. Unknown, make a units column later.
+
+Reminder of profitability categories (I have Profitable, Not Profitable, Break Even, Burning) -> Nearing Profitability
+
+potentially concentration -> yes? Concentration 
+
+API costs? Hours recorded (nah, give him 10)
+
+one click and done, or just want sheet filled? Just want data to be filled 22, 24K are Yes
+This is data answering the question: is there concentration in this company? The answer is a 
+
+unknown, give low confidence level
+
 
 Use " for strings, to account for 's
+
+
+725:
+
+privacy doesn't seem to be an issue: https://openai.com/enterprise-privacy/#our-commitments
+
+
