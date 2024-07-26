@@ -20,7 +20,6 @@ Use " for strings, to account for 's
 
 
 725:
-
 privacy doesn't seem to be an issue: https://openai.com/enterprise-privacy/#our-commitments
 API instructions:
 
@@ -38,4 +37,5 @@ API instructions:
 	b. In the left drop down column of your profile page, click Billing, then the green 'Add payment details' button.
 	c. Then I think you'll be able to set usage limits once the API gets used a bit, if you click on 'Usage limits' on 	https://platform.openai.com/settings/organization/billing/overview
 
-
+726:
+code+2->excel, i.e. 105->107
