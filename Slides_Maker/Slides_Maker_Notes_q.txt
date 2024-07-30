@@ -1,0 +1,14 @@
+WINDOWS MACRO INSTRUCTIONS:
+
+1. Open downloaded Excel Sheet
+2. Enable Macros and Select 'Yes' on 'Do you want to make this file a Trusted Document?' (you may need to enable Macros in the file's Properties which can be accessed by Right clicking on the file in the File Explorer, and the option should be at the bottom of the Properties window that opens).
+3. Enable PowerPoint interaction: Tools (in top bar) > References... > Make sure "Microsoft PowerPoint 16.0 Object Library" is checked in the list > OK to exit the window
+4. You can either run the macro from the VBA Editor (get to this with View > Macros > Edit on the right toolbar) by scrolling to the top SubFunction (FormatCopyAutomated) and pressing F5, or by pressing the button labeled 'Make Presentation' in the 'Main' Sheet.
+5. A local Presentation with the date in the name will be created (if there are more than 20 companies, a new cover page will be made).
+6. Before running the macro again, press the 'Reset' button in the 'Main' Sheet and it gives you the option to clear the 'Data' Sheet or not and always clears the cover and company pages leaving one empty cover page, the source company page ('Main') and the 'Data' Sheet.
+
+Notes:
+1. Can't have any relevant PowerPoint Presentations open. If 'Make Presentation' button not working, previous run may still be going -> go to VBA Editor and click Stop button in toolbar.
+2. Can't have two companies with the same name in the 'Data' Sheet (I'm assuming this won't be an issue but let me know if it is and I can fix).
+3. Can create Presentation with a subset of the data by changing 'lastRow' in this line to the desired number in FormatCopyAutomated():
+For i = 2 To lastRow ' Assuming row 1 has headers
